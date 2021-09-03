@@ -3,12 +3,16 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
   Query,
+  Res,
 } from '@nestjs/common';
 
+import { Response } from 'express';
 @Controller('products')
 export class ProductsController {
   // Ruta de productos que permite usar query
@@ -31,8 +35,13 @@ export class ProductsController {
 
   // Ruta que admite param
   @Get(':productId')
-  getProduct(@Param('productId') productId: string) {
-    return { message: `product ${productId}` };
+  @HttpCode(HttpStatus.ACCEPTED) //Podemos elegir nosotros que codigo devolver en la respuesta
+  // Podemos poner una response personalizada de esta forma
+  getProduct(@Res() response: Response, @Param('productId') productId: string) {
+    response.status(200).send({
+      message: `product ${productId}`,
+    });
+    // return { message: `product ${productId}` };
   }
 
   @Post()
