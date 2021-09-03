@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -20,6 +20,22 @@ export class AppController {
   @Get('/ruta/') //No es necesario poner slash, pero si lo ponemos igual funciona
   hello() {
     return 'con /sas/';
+  }
+
+  // Ruta de productos que permite usar query
+  @Get('products')
+  getProducts(
+    @Query('limit') limit = 100,
+    @Query('offset') offset = 50,
+    @Query('brand') brand: string,
+  ) {
+    return `products: limit => ${limit} offset => ${offset} brand => ${brand}`;
+  }
+
+  // Para que no tome filter como un :productId , hay que poner este antes
+  @Get('products/filter')
+  getProductFilter() {
+    return `Yo soy un filter`;
   }
 
   // Ruta que admite param
