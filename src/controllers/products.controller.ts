@@ -13,8 +13,12 @@ import {
 } from '@nestjs/common';
 
 import { Response } from 'express';
+import { ProductsService } from '../services/products.service';
+
 @Controller('products')
 export class ProductsController {
+  constructor(private productsService: ProductsService) {}
+
   // Ruta de productos que permite usar query
   @Get()
   getProducts(
@@ -22,9 +26,10 @@ export class ProductsController {
     @Query('offset') offset = 50,
     @Query('brand') brand: string,
   ) {
-    return {
-      message: `products: limit => ${limit} offset => ${offset} brand => ${brand}`,
-    };
+    // return {
+    //   message: `products: limit => ${limit} offset => ${offset} brand => ${brand}`,
+    // };
+    return this.productsService.findAll();
   }
 
   // Para que no tome filter como un :productId , hay que poner este antes
@@ -38,10 +43,10 @@ export class ProductsController {
   @HttpCode(HttpStatus.ACCEPTED) //Podemos elegir nosotros que codigo devolver en la respuesta
   // Podemos poner una response personalizada de esta forma
   getProduct(@Res() response: Response, @Param('productId') productId: string) {
-    response.status(200).send({
-      message: `product ${productId}`,
-    });
-    // return { message: `product ${productId}` };
+    // response.status(200).send({
+    //   message: `product ${productId}`,
+    // });
+    return this.productsService.findOne(+productId); // el signo + lo pasa a numero, ya que nos llega un string
   }
 
   @Post()
