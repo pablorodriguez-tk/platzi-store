@@ -3,16 +3,12 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   Post,
   Put,
   Query,
-  Res,
 } from '@nestjs/common';
 
-import { Response } from 'express';
 import { ProductsService } from '../services/products.service';
 
 @Controller('products')
@@ -26,9 +22,6 @@ export class ProductsController {
     @Query('offset') offset = 50,
     @Query('brand') brand: string,
   ) {
-    // return {
-    //   message: `products: limit => ${limit} offset => ${offset} brand => ${brand}`,
-    // };
     return this.productsService.findAll();
   }
 
@@ -40,30 +33,22 @@ export class ProductsController {
 
   // Ruta que admite param
   @Get(':productId')
-  @HttpCode(HttpStatus.ACCEPTED) //Podemos elegir nosotros que codigo devolver en la respuesta
-  // Podemos poner una response personalizada de esta forma
-  getProduct(@Res() response: Response, @Param('productId') productId: string) {
-    // response.status(200).send({
-    //   message: `product ${productId}`,
-    // });
-    return this.productsService.findOne(+productId); // el signo + lo pasa a numero, ya que nos llega un string
+  getProduct(@Param('productId') productId: string) {
+    return this.productsService.findById(+productId); // el signo + lo pasa a numero, ya que nos llega un string
   }
 
   @Post()
   create(@Body() payload: any) {
-    return {
-      message: 'accion para crear',
-      payload,
-    };
+    return this.productsService.create(payload);
   }
 
   @Put(':id')
   update(@Param('id') id: number, @Body() payload: any) {
-    return { id, payload };
+    return this.productsService.update(+id, payload);
   }
 
   @Delete(':id')
   delete(@Param('id') id: number) {
-    return { id };
+    return this.productsService.delete(+id);
   }
 }
