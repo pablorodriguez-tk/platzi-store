@@ -7,9 +7,11 @@ import {
   Post,
   Put,
   Query,
+  // ParseIntPipe,
 } from '@nestjs/common';
 
 import { ProductsService } from '../services/products.service';
+import { ParseIntPipe } from '../common/parse-int.pipe';
 
 @Controller('products')
 export class ProductsController {
@@ -33,8 +35,8 @@ export class ProductsController {
 
   // Ruta que admite param
   @Get(':productId')
-  getProduct(@Param('productId') productId: string) {
-    return this.productsService.findById(+productId); // el signo + lo pasa a numero, ya que nos llega un string
+  getProduct(@Param('productId', ParseIntPipe) productId: number) {
+    return this.productsService.findById(productId); // el signo + lo pasa a numero, ya que nos llega un string
   }
 
   @Post()
@@ -48,7 +50,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  delete(@Param('id') id: number) {
-    return this.productsService.delete(+id);
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.delete(id);
   }
 }
