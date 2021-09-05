@@ -7,8 +7,8 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { CreateBrandDto, UpdateBrandDto } from 'src/dtos/brand.dtos';
-import { ParseIntPipe } from '../common/parse-int.pipe';
+import { CreateBrandDto, UpdateBrandDto } from '../dtos/brand.dtos';
+import { ParseIntPipe } from '../../common/parse-int.pipe';
 import { BrandsService } from '../services/brands.service';
 
 @Controller('brands')
