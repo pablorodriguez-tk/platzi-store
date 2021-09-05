@@ -12,7 +12,7 @@ export class ProductsService {
       description: 'blabla',
       price: 122,
       stock: 12,
-      image: '',
+      image: 'https://exampe.com',
     },
   ];
 
@@ -21,15 +21,13 @@ export class ProductsService {
   }
 
   findById(id: number) {
-    const products = this.products.filter((product) => product.id === id);
-    if (products.length === 0)
+    const product = this.products.filter((product) => product.id === id);
+    if (product.length === 0)
       throw new NotFoundException(`Product #${id} not found`);
-    return products;
+    return product;
   }
 
   create(payload: CreateProductDto) {
-    console.log(payload);
-
     this.counterId = this.counterId + 1;
     const newProduct = { id: this.counterId, ...payload };
     this.products.push(newProduct);
