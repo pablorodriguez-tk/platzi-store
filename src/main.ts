@@ -6,7 +6,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Validation
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
 
   await app.listen(3000);
 }
