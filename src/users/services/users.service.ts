@@ -1,6 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Client } from 'pg';
+import { Repository } from 'typeorm';
 import { ProductsService } from '../../products/services/products.service';
 import { CreateUserDto, UpdateUserDto } from '../dtos/user.dtos';
 import { Order } from '../entities/order.entity';
@@ -12,59 +14,39 @@ export class UsersService {
     private productsService: ProductsService,
     private configService: ConfigService,
     @Inject('PG') private clientPg: Client,
+    @InjectRepository(User) private userRepo: Repository<User>,
   ) {}
 
-  private counterId = 1;
-  private users: User[] = [
-    {
-      id: 1,
-      email: 'correo@mail.com',
-      password: '12345',
-      role: 'admin',
-    },
-  ];
-
-  findAll() {
+  async findAll() {
     const apiKey = this.configService.get('API_KEY');
     const dbName = this.configService.get('DATABASE_NAME');
     console.log(apiKey, dbName);
-
-    return this.users;
+    return await this.userRepo.find();
   }
 
-  findById(id: number) {
-    const user = this.users.filter((user) => user.id === id);
-    if (user.length === 0) throw new NotFoundException(`User #${id} not found`);
+  async findById(id: number) {
+    const user = await this.userRepo.findOne(id);
+    if (!user) throw new NotFoundException(`User #${id} not found`);
     return user;
   }
 
   create(payload: CreateUserDto) {
-    this.counterId = this.counterId + 1;
-    const newUser = { id: this.counterId, ...payload };
-    this.users.push(newUser);
-
-    return newUser;
+    const newUser = this.userRepo.create(payload);
+    return this.userRepo.save(newUser);
   }
 
-  update(id: number, payload: UpdateUserDto) {
-    this.users = this.users.map((user) => {
-      if (user.id === id) return { ...user, ...payload };
-      else return user;
-    });
-
-    return this.findById(id);
+  async update(id: number, payload: UpdateUserDto) {
+    const user = await this.userRepo.findOne(id);
+    this.userRepo.merge(user, payload);
+    return this.userRepo.save(user);
   }
 
-  delete(id: number) {
-    const userFinded = this.findById(id);
-    if (userFinded)
-      this.users = this.users.filter((user: User) => user.id !== id);
-
-    return userFinded;
+  async delete(id: number) {
+    return await this.userRepo.delete(id);
   }
 
-  async getOrderByUser(id: number) {
-    const user = this.findById(id);
+  async getOrderByUser(id: number): Promise<Order> {
+    const user = await this.userRepo.findOne(id);
     return {
       date: new Date(),
       user,

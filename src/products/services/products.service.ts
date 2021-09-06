@@ -11,8 +11,8 @@ export class ProductsService {
     @InjectRepository(Product) private productRepo: Repository<Product>,
   ) {}
 
-  findAll() {
-    return this.productRepo.find();
+  async findAll() {
+    return await this.productRepo.find();
   }
 
   async findById(id: number) {
@@ -32,7 +32,7 @@ export class ProductsService {
     return this.productRepo.save(product);
   }
 
-  delete(id: number) {
-    return this.productRepo.delete(id);
+  async delete(id: number) {
+    return await this.productRepo.delete(id);
   }
 }

@@ -2,54 +2,37 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { Customer } from '../entities/customer.entity';
 import { CreateCustomerDto, UpdateCustomerDto } from '../dtos/customer.dtos';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class CustomersService {
-  private counterId = 1;
-  private customers: Customer[] = [
-    {
-      id: 1,
-      name: 'Nicolas',
-      lastName: 'Molina',
-      phone: '3111111212',
-    },
-  ];
+  constructor(
+    @InjectRepository(Customer) private customerRepo: Repository<Customer>,
+  ) {}
 
-  findAll() {
-    return this.customers;
+  async findAll() {
+    return await this.customerRepo.find();
   }
 
-  findById(id: number) {
-    const customer = this.customers.filter((item) => item.id === id);
-    if (customer.length === 0)
-      throw new NotFoundException(`Customer #${id} not found`);
+  async findById(id: number) {
+    const customer = await this.customerRepo.findOne(id);
+    if (!customer) throw new NotFoundException(`Customer #${id} not found`);
     return customer;
   }
 
   create(payload: CreateCustomerDto) {
-    this.counterId = this.counterId + 1;
-    const newCustomer = { id: this.counterId, ...payload };
-    this.customers.push(newCustomer);
-
-    return newCustomer;
+    const newCustomer = this.customerRepo.create(payload);
+    return this.customerRepo.save(newCustomer);
   }
 
-  update(id: number, payload: UpdateCustomerDto) {
-    this.customers = this.customers.map((customer) => {
-      if (customer.id === id) return { ...customer, ...payload };
-      else return customer;
-    });
-
-    return this.findById(id);
+  async update(id: number, payload: UpdateCustomerDto) {
+    const customer = await this.customerRepo.findOne(id);
+    this.customerRepo.merge(customer, payload);
+    return this.customerRepo.save(customer);
   }
 
-  delete(id: number) {
-    const customerFinded = this.findById(id);
-    if (customerFinded)
-      this.customers = this.customers.filter(
-        (customer: Customer) => customer.id !== id,
-      );
-
-    return customerFinded;
+  async delete(id: number) {
+    return await this.customerRepo.delete(id);
   }
 }
