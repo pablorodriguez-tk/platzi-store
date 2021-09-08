@@ -7,6 +7,7 @@ import { ProductsService } from '../../products/services/products.service';
 import { CreateUserDto, UpdateUserDto } from '../dtos/user.dtos';
 import { Order } from '../entities/order.entity';
 import { User } from '../entities/user.entity';
+import { CustomersService } from './customers.service';
 
 @Injectable()
 export class UsersService {
@@ -15,23 +16,28 @@ export class UsersService {
     private configService: ConfigService,
     @Inject('PG') private clientPg: Client,
     @InjectRepository(User) private userRepo: Repository<User>,
+    private customersService: CustomersService,
   ) {}
 
   async findAll() {
     const apiKey = this.configService.get('API_KEY');
     const dbName = this.configService.get('DATABASE_NAME');
     console.log(apiKey, dbName);
-    return await this.userRepo.find();
+    return await this.userRepo.find({ relations: ['customer'] });
   }
 
   async findById(id: number) {
-    const user = await this.userRepo.findOne(id);
+    const user = await this.userRepo.findOne(id, { relations: ['customer'] });
     if (!user) throw new NotFoundException(`User #${id} not found`);
     return user;
   }
 
-  create(payload: CreateUserDto) {
+  async create(payload: CreateUserDto) {
     const newUser = this.userRepo.create(payload);
+    if (payload.customerId) {
+      const customer = await this.customersService.findById(payload.customerId);
+      newUser.customer = customer;
+    }
     return this.userRepo.save(newUser);
   }
 
