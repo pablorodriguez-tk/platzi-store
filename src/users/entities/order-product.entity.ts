@@ -2,27 +2,18 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToMany,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { Product } from '../../products/entities/product.entity';
 import { Order } from './order.entity';
-import { User } from './user.entity';
 
 @Entity()
-export class Customer {
+export class OrderItem {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ type: 'varchar', length: 255 })
-  name: string;
-
-  @Column({ type: 'varchar', length: 255 })
-  lastName: string;
-
-  @Column({ type: 'varchar', length: 255 })
-  phone: string;
 
   @CreateDateColumn({
     type: 'timestamptz',
@@ -36,9 +27,12 @@ export class Customer {
   })
   updateAt: Date;
 
-  @OneToOne(() => User, (user) => user.customer)
-  user: User;
+  @Column({ type: 'int' }) // columna que se agrega a la relacion
+  quantity: number;
 
-  @ManyToMany(() => Order, (order) => order.customer)
-  orders: Order[];
+  @ManyToOne(() => Product) // en este caso no es funcional la relación bidireccional
+  product: Product;
+
+  @ManyToOne(() => Order, (order) => order.items)
+  order: Order;
 }
